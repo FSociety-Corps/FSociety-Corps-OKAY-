@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import {
   setGuild,
@@ -7,13 +6,8 @@ import {
   removeMember,
 } from './store.js';
 
-const token = process.env.DISCORD_TOKEN;
-const guildId = process.env.GUILD_ID;
-
-if (!token || !guildId) {
-  console.error('missing DISCORD_TOKEN or GUILD_ID');
-  process.exit(1);
-}
+const profiles = new Map();
+let guildId;
 
 const client = new Client({
   intents: [
@@ -23,8 +17,6 @@ const client = new Client({
   ],
   partials: [Partials.GuildMember, Partials.User],
 });
-
-const profiles = new Map();
 
 function hex(n) {
   return '#' + n.toString(16).padStart(6, '0');
@@ -158,10 +150,7 @@ client.on('presenceUpdate', (_, p) => {
 
 client.on('error', e => console.error('client error:', e));
 
-client.login(token).catch(e => {
-  console.error('login failed:', e);
-  process.exit(1);
-});
-
-process.on('SIGINT', () => process.exit(0));
-process.on('SIGTERM', () => process.exit(0));
+export function start(token, gid) {
+  guildId = gid;
+  return client.login(token);
+}

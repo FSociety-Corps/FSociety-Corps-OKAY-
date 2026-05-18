@@ -4,11 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "bot": "node src/bot.js",
-    "web": "node src/web.js",
+    "dev": "node src/index.js",
     "start": "pm2 start ecosystem.config.cjs",
     "stop": "pm2 stop ecosystem.config.cjs",
-    "logs": "pm2 logs"
+    "logs": "pm2 logs fsus"
   },
   "dependencies": {
     "discord.js": "^14.16.3",

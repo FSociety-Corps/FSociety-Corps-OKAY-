@@ -4,24 +4,11 @@ import path from 'node:path';
 const file = path.resolve('data/members.json');
 const tmp = file + '.tmp';
 
-let state = {
-  guild: null,
-  members: [],
-  updatedAt: 0,
-};
+let state = { guild: null, members: [], updatedAt: 0 };
 
-let lastMtime = 0;
-
-function load() {
-  try {
-    const stat = fs.statSync(file);
-    if (stat.mtimeMs === lastMtime) return;
-    state = JSON.parse(fs.readFileSync(file, 'utf8'));
-    lastMtime = stat.mtimeMs;
-  } catch {}
-}
-
-load();
+try {
+  state = JSON.parse(fs.readFileSync(file, 'utf8'));
+} catch {}
 
 let writePending = false;
 function persist() {
@@ -31,15 +18,12 @@ function persist() {
     writePending = false;
     fs.writeFile(tmp, JSON.stringify(state), err => {
       if (err) return;
-      fs.rename(tmp, file, () => {
-        try { lastMtime = fs.statSync(file).mtimeMs; } catch {}
-      });
+      fs.rename(tmp, file, () => {});
     });
   });
 }
 
 export function snapshot() {
-  load();
   return state;
 }
 
