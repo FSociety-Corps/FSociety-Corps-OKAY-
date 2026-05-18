@@ -123,7 +123,7 @@ function activityHtml(a) {
     const e = a.emoji?.name ?? '';
     const text = [e, a.state].filter(Boolean).join(' ');
     if (!text) return '';
-    return `<div class="act"><div class="act-kind">status</div><div class="act-main">${esc(text)}</div></div>`;
+    return `<div class="act"><div class="act-body"><div class="act-kind">status</div><div class="act-main">${esc(text)}</div></div></div>`;
   }
 
   const isSpotify = a.name === 'Spotify' && a.type === 2;
@@ -145,11 +145,16 @@ function activityHtml(a) {
     bar = `<div class="elapsed" data-start="${a.start}"></div>`;
   }
 
+  const icon = a.largeImage ? `<div class="act-icon"><img src="${a.largeImage}" alt=""></div>` : '';
+
   return `<div class="act">
-    <div class="act-kind${isSpotify ? ' spotify' : ''}">${kind}</div>
-    <div class="act-main">${esc(main)}</div>
-    ${sub ? `<div class="act-sub">${esc(sub)}</div>` : ''}
-    ${bar}
+    ${icon}
+    <div class="act-body">
+      <div class="act-kind${isSpotify ? ' spotify' : ''}">${kind}</div>
+      <div class="act-main">${esc(main)}</div>
+      ${sub ? `<div class="act-sub">${esc(sub)}</div>` : ''}
+      ${bar}
+    </div>
   </div>`;
 }
 

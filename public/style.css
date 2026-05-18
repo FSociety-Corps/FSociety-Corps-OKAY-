@@ -190,9 +190,13 @@ main.board { display: flex; flex-direction: column; }
 
 .m-acts { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
 
-.act { font-size: 13px; }
+.act { display: flex; gap: 10px; font-size: 13px; }
+.act-icon { width: 42px; height: 42px; flex-shrink: 0; background: #222; }
+.act-icon img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.act-body { flex: 1; min-width: 0; }
 .act-kind { color: #777; font-size: 11px; margin-bottom: 2px; }
 .act-kind.spotify { color: #1db954; }
+.act-main, .act-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .act-main { color: #e6e6e6; }
 .act-sub { color: #888; font-size: 12px; }
 
