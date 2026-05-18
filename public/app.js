@@ -120,50 +120,36 @@ function render() {
 
 function activityHtml(a) {
   if (a.type === 4) {
-    const emoji = a.emoji?.url
-      ? `<img src="${a.emoji.url}" alt="">`
-      : (a.emoji?.name ? `<span>${esc(a.emoji.name)}</span>` : '');
-    const text = a.state ? esc(a.state) : '';
-    if (!emoji && !text) return '';
-    return `<div class="custom">${emoji}<span>${text}</span></div>`;
+    const e = a.emoji?.name ?? '';
+    const text = [e, a.state].filter(Boolean).join(' ');
+    if (!text) return '';
+    return `<div class="act"><div class="act-kind">status</div><div class="act-main">${esc(text)}</div></div>`;
   }
 
   const isSpotify = a.name === 'Spotify' && a.type === 2;
-  const kindLabel = isSpotify ? 'listening to spotify' : (actKind[a.type] ?? 'doing');
-  const imgSrc = a.largeImage ?? (isSpotify ? null : null);
-  const imgHtml = imgSrc
-    ? `<div class="act-img"><img src="${imgSrc}" alt="">${a.smallImage ? `<img class="small" src="${a.smallImage}" alt="" title="${esc(a.smallText ?? '')}">` : ''}</div>`
-    : '';
+  const kind = isSpotify ? 'listening to spotify' : (actKind[a.type] ?? 'doing');
+  const main = isSpotify
+    ? [a.details, a.state].filter(Boolean).join(' — ')
+    : a.name;
+  const sub = isSpotify
+    ? (a.largeText ?? '')
+    : [a.details, a.state].filter(Boolean).join(' — ');
 
-  const lines = [];
-  lines.push(`<div class="act-line main">${esc(isSpotify ? a.details : a.name)}</div>`);
-  if (isSpotify) {
-    if (a.state) lines.push(`<div class="act-line sub">by ${esc(a.state)}</div>`);
-    if (a.largeText) lines.push(`<div class="act-line dim">on ${esc(a.largeText)}</div>`);
-  } else {
-    if (a.details) lines.push(`<div class="act-line sub">${esc(a.details)}</div>`);
-    if (a.state) lines.push(`<div class="act-line dim">${esc(a.state)}</div>`);
-  }
-
-  const hasBar = a.start && a.end;
-  const hasElapsed = a.start && !a.end;
-  let barHtml = '';
-  if (hasBar) {
-    barHtml = `<div class="bar-wrap" data-start="${a.start}" data-end="${a.end}">
-      <div class="bar-track"><div class="bar-fill${isSpotify ? ' spotify' : ''}"></div></div>
-      <div class="bar-times"><span class="pos">0:00</span><span class="dur">${fmtClock(a.end - a.start)}</span></div>
+  let bar = '';
+  if (a.start && a.end) {
+    bar = `<div class="bar-wrap" data-start="${a.start}" data-end="${a.end}">
+      <div class="bar${isSpotify ? ' spotify' : ''}"><div></div></div>
+      <div class="bar-time"><span class="pos">0:00</span> / ${fmtClock(a.end - a.start)}</div>
     </div>`;
-  } else if (hasElapsed) {
-    barHtml = `<div class="act-line dim elapsed" data-start="${a.start}" style="margin-top:6px"></div>`;
+  } else if (a.start) {
+    bar = `<div class="elapsed" data-start="${a.start}"></div>`;
   }
 
   return `<div class="act">
-    ${imgHtml}
-    <div class="act-body">
-      <div class="act-kind${isSpotify ? ' spotify' : ''}">${kindLabel}</div>
-      ${lines.join('')}
-      ${barHtml}
-    </div>
+    <div class="act-kind${isSpotify ? ' spotify' : ''}">${kind}</div>
+    <div class="act-main">${esc(main)}</div>
+    ${sub ? `<div class="act-sub">${esc(sub)}</div>` : ''}
+    ${bar}
   </div>`;
 }
 
@@ -192,18 +178,15 @@ function paintModal() {
   modal.querySelector('#m-handle').textContent = '@' + m.username + (m.bot ? ' · bot' : '');
 
   const acts = modal.querySelector('#m-activities');
-  const html = (m.activities ?? []).map(activityHtml).filter(Boolean).join('');
-  acts.innerHTML = html ? `<h3>activity</h3>${html}` : '';
+  acts.innerHTML = (m.activities ?? []).map(activityHtml).filter(Boolean).join('');
 
   const roles = modal.querySelector('#m-roles');
   roles.innerHTML = m.roles?.length
-    ? '<h3>roles</h3><div class="roles-list">' + m.roles.map(r =>
-        `<span class="role-chip" style="color:${r.color !== '#000000' ? r.color : '#aaa'}">${esc(r.name)}</span>`
-      ).join('') + '</div>'
+    ? m.roles.map(r => `<span style="color:${r.color !== '#000000' ? r.color : '#aaa'}">${esc(r.name)}</span>`).join('')
     : '';
 
   const joined = modal.querySelector('#m-joined');
-  joined.textContent = m.joinedAt ? `joined ${dateFmt.format(m.joinedAt)} · ${relTime(m.joinedAt)}` : '';
+  joined.textContent = m.joinedAt ? `joined ${dateFmt.format(m.joinedAt)}` : '';
 
   tickProgress();
 }
@@ -215,7 +198,7 @@ function tickProgress() {
     const end = Number(w.dataset.end);
     const total = end - start;
     const pos = Math.max(0, Math.min(total, now - start));
-    w.querySelector('.bar-fill').style.width = (pos / total * 100) + '%';
+    w.querySelector('.bar > div').style.width = (pos / total * 100) + '%';
     w.querySelector('.pos').textContent = fmtClock(pos);
   });
   modal.querySelectorAll('.elapsed').forEach(e => {
