@@ -29,6 +29,29 @@
 
   <main id="grid"></main>
 
+  <div id="modal" hidden>
+    <div class="sheet">
+      <button class="close" aria-label="close">×</button>
+      <div class="banner"></div>
+      <div class="head">
+        <div class="bigav">
+          <img id="m-avatar" alt="">
+          <img id="m-deco" class="deco" alt="" hidden>
+          <span id="m-dot" class="dot"></span>
+        </div>
+        <div class="title">
+          <h2 id="m-name"></h2>
+          <div id="m-handle" class="tag"></div>
+        </div>
+      </div>
+      <div class="body">
+        <section id="m-activities"></section>
+        <section id="m-roles" class="roles"></section>
+        <section id="m-joined" class="joined-line"></section>
+      </div>
+    </div>
+  </div>
+
   <footer id="status">connecting</footer>
 
   <script src="/app.js"></script>

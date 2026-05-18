@@ -68,11 +68,3 @@ export function removeMember(id) {
   state.updatedAt = Date.now();
   persist();
 }
-
-export function patchPresence(id, status) {
-  const m = state.members.find(x => x.id === id);
-  if (!m) return;
-  m.status = status;
-  state.updatedAt = Date.now();
-  persist();
-}
