@@ -3,7 +3,6 @@ const q = document.getElementById('q');
 const count = document.getElementById('count');
 const guildEl = document.getElementById('guild');
 const ago = document.getElementById('ago');
-const statusEl = document.getElementById('status');
 const viewBtns = document.querySelectorAll('.views button');
 const modal = document.getElementById('modal');
 
@@ -128,10 +127,11 @@ function renderBoard(list) {
 }
 
 function render() {
-  count.textContent = data.members.length;
+  const humans = data.members.filter(m => !m.bot);
+  count.textContent = humans.length;
   guildEl.textContent = data.guild?.name ?? '—';
   ago.textContent = relTime(data.updatedAt);
-  const list = data.members.filter(matches);
+  const list = humans.filter(matches);
   grid.className = view;
   grid.innerHTML = view === 'board' ? renderBoard(list) : renderGrid(list);
   if (openId) paintModal();
@@ -271,13 +271,8 @@ async function pull() {
     const r = await fetch('/api/members', { cache: 'no-store' });
     if (!r.ok) throw 0;
     data = await r.json();
-    statusEl.textContent = 'live';
-    statusEl.classList.remove('off');
     render();
-  } catch {
-    statusEl.textContent = 'reconnecting';
-    statusEl.classList.add('off');
-  }
+  } catch {}
 }
 
 q.addEventListener('input', e => { term = e.target.value; render(); });

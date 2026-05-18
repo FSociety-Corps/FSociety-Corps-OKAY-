@@ -292,17 +292,6 @@ main.board { display: flex; flex-direction: column; }
   color: #555;
 }
 
-#status {
-  position: fixed;
-  bottom: 8px;
-  right: 12px;
-  font-size: 11px;
-  color: #666;
-}
-
-#status::before { content: '● '; color: #43b581; }
-#status.off::before { color: #f04747; }
-
 @media (max-width: 600px) {
   body { padding: 20px 12px 64px; }
   h1 { font-size: 32px; }
