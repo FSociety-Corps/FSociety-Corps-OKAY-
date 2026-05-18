@@ -137,9 +137,9 @@ function activityHtml(a) {
 
   let bar = '';
   if (a.start && a.end) {
-    bar = `<div class="bar-wrap" data-start="${a.start}" data-end="${a.end}">
-      <div class="bar${isSpotify ? ' spotify' : ''}"><div></div></div>
-      <div class="bar-time"><span class="pos">0:00</span> / ${fmtClock(a.end - a.start)}</div>
+    bar = `<div class="prog-wrap" data-start="${a.start}" data-end="${a.end}">
+      <div class="prog${isSpotify ? ' spotify' : ''}"><div></div></div>
+      <div class="prog-time"><span class="pos">0:00</span> / ${fmtClock(a.end - a.start)}</div>
     </div>`;
   } else if (a.start) {
     bar = `<div class="elapsed" data-start="${a.start}"></div>`;
@@ -193,12 +193,12 @@ function paintModal() {
 
 function tickProgress() {
   const now = Date.now();
-  modal.querySelectorAll('.bar-wrap').forEach(w => {
+  modal.querySelectorAll('.prog-wrap').forEach(w => {
     const start = Number(w.dataset.start);
     const end = Number(w.dataset.end);
     const total = end - start;
     const pos = Math.max(0, Math.min(total, now - start));
-    w.querySelector('.bar > div').style.width = (pos / total * 100) + '%';
+    w.querySelector('.prog > div').style.width = (pos / total * 100) + '%';
     w.querySelector('.pos').textContent = fmtClock(pos);
   });
   modal.querySelectorAll('.elapsed').forEach(e => {
