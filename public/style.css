@@ -30,11 +30,16 @@ h1 {
 .dot-sep { color: #3a3a3a; margin: 0 6px; }
 #guild { color: #f4c542; }
 
-#q {
-  display: block;
+.bar {
   max-width: 1100px;
   margin: 0 auto 16px;
-  width: 100%;
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+#q {
+  flex: 1;
   background: #161616;
   border: 1px solid #262626;
   color: #e6e6e6;
@@ -45,12 +50,64 @@ h1 {
 
 #q:focus { border-color: #f4c542; }
 
-main {
-  max-width: 1100px;
-  margin: 0 auto;
+.views { display: flex; }
+
+.views button {
+  background: #161616;
+  border: 1px solid #262626;
+  color: #888;
+  font: inherit;
+  padding: 0 14px;
+  cursor: pointer;
+  margin-left: -1px;
+}
+
+.views button:hover { color: #e6e6e6; }
+.views button.on { color: #f4c542; border-color: #3a3a2a; background: #1c1a12; }
+
+main { max-width: 1100px; margin: 0 auto; }
+
+main.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 8px;
+}
+
+main.board { display: flex; flex-direction: column; }
+
+.row {
+  display: grid;
+  grid-template-columns: 60px 56px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.row:hover { background: #141414; }
+
+.rank {
+  font-size: 18px;
+  font-weight: 700;
+  color: #555;
+  text-align: right;
+}
+
+.rank.r1 { color: #f4c542; }
+.rank.r2 { color: #c8c8c8; }
+.rank.r3 { color: #c08a3a; }
+
+.row .name { font-size: 15px; }
+.row .tag { font-size: 11px; color: #777; margin-top: 2px; }
+
+.joined { text-align: right; color: #888; font-size: 12px; }
+.joined .abs { color: #555; font-size: 11px; margin-top: 2px; }
+.joined > div { display: block; }
+
+@media (max-width: 600px) {
+  .row { grid-template-columns: 40px 44px 1fr auto; gap: 10px; padding: 10px; }
+  .rank { font-size: 15px; }
+  .joined .abs { display: none; }
 }
 
 .card {
