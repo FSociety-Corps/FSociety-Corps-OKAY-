@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>fsociety</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+
+  <header>
+    <pre class="ascii" data-text="fsociety">
+ ___                _      _
+| __|__ ___  ___ __(_)___ | |_ _  _
+| _|(_-</ _ \/ _|/ _| / -_)|  _| || |
+|_| /__/\___/\___\__|_\___| \__|\_, |
+                                |__/
+    </pre>
+    <div class="meta">
+      <span id="guild">—</span>
+      <span class="sep">/</span>
+      <span><b id="count">0</b> operatives</span>
+      <span class="sep">/</span>
+      <span>synced <span id="ago">never</span></span>
+    </div>
+  </header>
+
+  <div class="bar">
+    <span class="prompt">root@fsociety:~$ grep</span>
+    <input id="q" placeholder="filter by name…" autocomplete="off" spellcheck="false" />
+    <span class="cursor">_</span>
+  </div>
+
+  <main id="grid"></main>
+
+  <footer>
+    <span>// the world we live in</span>
+    <span id="status">connecting…</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
