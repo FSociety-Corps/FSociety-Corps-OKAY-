@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import {
   setGuild,
@@ -7,14 +8,20 @@ import {
   patchPresence,
 } from './store.js';
 
-const intents = [
-  GatewayIntentBits.Guilds,
-  GatewayIntentBits.GuildMembers,
-  GatewayIntentBits.GuildPresences,
-];
+const token = process.env.DISCORD_TOKEN;
+const guildId = process.env.GUILD_ID;
+
+if (!token || !guildId) {
+  console.error('missing DISCORD_TOKEN or GUILD_ID');
+  process.exit(1);
+}
 
 const client = new Client({
-  intents,
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences,
+  ],
   partials: [Partials.GuildMember, Partials.User],
 });
 
@@ -41,52 +48,55 @@ function pack(member) {
   };
 }
 
-export async function start(token, guildId) {
-  client.once('ready', async c => {
-    console.log(`logged in as ${c.user.tag}`);
-    const guild = await c.guilds.fetch(guildId);
-    setGuild({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.iconURL({ size: 512, extension: 'png' }),
-      banner: guild.bannerURL({ size: 1024 }),
-      memberCount: guild.memberCount,
-    });
-
-    const all = await guild.members.fetch();
-    replaceMembers(all.map(pack));
-    console.log(`cached ${all.size} members`);
+client.once('clientReady', async c => {
+  console.log(`logged in as ${c.user.tag}`);
+  const guild = await c.guilds.fetch(guildId);
+  setGuild({
+    id: guild.id,
+    name: guild.name,
+    icon: guild.iconURL({ size: 512, extension: 'png' }),
+    banner: guild.bannerURL({ size: 1024 }),
+    memberCount: guild.memberCount,
   });
+  const all = await guild.members.fetch();
+  replaceMembers(all.map(pack));
+  console.log(`cached ${all.size} members`);
+});
 
-  client.on('guildMemberAdd', m => {
-    if (m.guild.id !== guildId) return;
-    upsertMember(pack(m));
-  });
+client.on('guildMemberAdd', m => {
+  if (m.guild.id !== guildId) return;
+  upsertMember(pack(m));
+});
 
-  client.on('guildMemberRemove', m => {
-    if (m.guild.id !== guildId) return;
-    removeMember(m.id);
-  });
+client.on('guildMemberRemove', m => {
+  if (m.guild.id !== guildId) return;
+  removeMember(m.id);
+});
 
-  client.on('guildMemberUpdate', (_, m) => {
-    if (m.guild.id !== guildId) return;
-    upsertMember(pack(m));
-  });
+client.on('guildMemberUpdate', (_, m) => {
+  if (m.guild.id !== guildId) return;
+  upsertMember(pack(m));
+});
 
-  client.on('userUpdate', async (_, user) => {
-    try {
-      const guild = await client.guilds.fetch(guildId);
-      const m = await guild.members.fetch(user.id).catch(() => null);
-      if (m) upsertMember(pack(m));
-    } catch {}
-  });
+client.on('userUpdate', async (_, user) => {
+  try {
+    const guild = await client.guilds.fetch(guildId);
+    const m = await guild.members.fetch(user.id).catch(() => null);
+    if (m) upsertMember(pack(m));
+  } catch {}
+});
 
-  client.on('presenceUpdate', (_, p) => {
-    if (!p?.guild || p.guild.id !== guildId) return;
-    patchPresence(p.userId, p.status);
-  });
+client.on('presenceUpdate', (_, p) => {
+  if (!p?.guild || p.guild.id !== guildId) return;
+  patchPresence(p.userId, p.status);
+});
 
-  client.on('error', e => console.error('client error:', e));
+client.on('error', e => console.error('client error:', e));
 
-  await client.login(token);
-}
+client.login(token).catch(e => {
+  console.error('login failed:', e);
+  process.exit(1);
+});
+
+process.on('SIGINT', () => process.exit(0));
+process.on('SIGTERM', () => process.exit(0));

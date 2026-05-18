@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const file = path.resolve('data/members.json');
+const tmp = file + '.tmp';
 
 let state = {
   guild: null,
@@ -9,10 +10,18 @@ let state = {
   updatedAt: 0,
 };
 
-try {
-  const raw = fs.readFileSync(file, 'utf8');
-  state = JSON.parse(raw);
-} catch {}
+let lastMtime = 0;
+
+function load() {
+  try {
+    const stat = fs.statSync(file);
+    if (stat.mtimeMs === lastMtime) return;
+    state = JSON.parse(fs.readFileSync(file, 'utf8'));
+    lastMtime = stat.mtimeMs;
+  } catch {}
+}
+
+load();
 
 let writePending = false;
 function persist() {
@@ -20,11 +29,17 @@ function persist() {
   writePending = true;
   setImmediate(() => {
     writePending = false;
-    fs.writeFile(file, JSON.stringify(state), () => {});
+    fs.writeFile(tmp, JSON.stringify(state), err => {
+      if (err) return;
+      fs.rename(tmp, file, () => {
+        try { lastMtime = fs.statSync(file).mtimeMs; } catch {}
+      });
+    });
   });
 }
 
 export function snapshot() {
+  load();
   return state;
 }
 
