@@ -8,7 +8,7 @@ const statusEl = document.getElementById('status');
 let data = { guild: null, members: [], updatedAt: 0 };
 let term = '';
 
-const statusOrder = { online: 0, idle: 1, dnd: 2, offline: 3 };
+const order = { online: 0, idle: 1, dnd: 2, offline: 3 };
 
 function relTime(ms) {
   if (!ms) return 'never';
@@ -20,22 +20,24 @@ function relTime(ms) {
   return Math.floor(s / 86400) + 'd ago';
 }
 
+function esc(s) {
+  return String(s ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function render() {
+  const t = term.toLowerCase();
   const list = data.members
-    .filter(m => {
-      if (!term) return true;
-      const t = term.toLowerCase();
-      return (
-        m.displayName?.toLowerCase().includes(t) ||
-        m.username?.toLowerCase().includes(t) ||
-        m.globalName?.toLowerCase().includes(t)
-      );
-    })
+    .filter(m => !t ||
+      m.displayName.toLowerCase().includes(t) ||
+      m.username.toLowerCase().includes(t))
     .sort((a, b) => {
-      const sa = statusOrder[a.status] ?? 3;
-      const sb = statusOrder[b.status] ?? 3;
-      if (sa !== sb) return sa - sb;
-      return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' });
+      const d = (order[a.status] ?? 3) - (order[b.status] ?? 3);
+      return d || a.displayName.localeCompare(b.displayName);
     });
 
   count.textContent = data.members.length;
@@ -43,51 +45,41 @@ function render() {
   ago.textContent = relTime(data.updatedAt);
 
   if (!list.length) {
-    grid.innerHTML = '<div class="empty">no matches.</div>';
+    grid.innerHTML = '<div class="empty">no matches</div>';
     return;
   }
 
   grid.innerHTML = list.map(m => {
     const role = m.roles?.[0];
-    const roleHtml = role
-      ? `<div class="role" style="color:${role.color !== '#000000' ? role.color : 'var(--dim)'}">@${escape(role.name)}</div>`
-      : '';
-    const decoHtml = m.decoration
-      ? `<img class="deco" src="${m.decoration}" alt="" />`
-      : '';
-    const nameColor = m.color ? `style="color:${m.color}"` : '';
-    return `
-      <div class="card ${m.bot ? 'bot' : ''}">
-        <div class="avatar">
-          <img src="${m.avatar}" alt="" loading="lazy" />
-          ${decoHtml}
-          <span class="dot ${m.status}"></span>
-        </div>
-        <div class="who">
-          <div class="name" ${nameColor}>${escape(m.displayName)}</div>
-          <div class="tag">@${escape(m.username)}</div>
-          ${roleHtml}
-        </div>
-      </div>`;
+    const roleColor = role && role.color !== '#000000' ? role.color : '#777';
+    const roleHtml = role ? `<div class="role" style="color:${roleColor}">@${esc(role.name)}</div>` : '';
+    const decoHtml = m.decoration ? `<img class="deco" src="${m.decoration}" alt="">` : '';
+    const nameStyle = m.color ? `style="color:${m.color}"` : '';
+    return `<div class="card${m.bot ? ' bot' : ''}">
+      <div class="avatar">
+        <img src="${m.avatar}" alt="" loading="lazy">
+        ${decoHtml}
+        <span class="dot ${m.status}"></span>
+      </div>
+      <div class="who">
+        <div class="name" ${nameStyle}>${esc(m.displayName)}</div>
+        <div class="tag">@${esc(m.username)}</div>
+        ${roleHtml}
+      </div>
+    </div>`;
   }).join('');
-}
-
-function escape(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
 }
 
 async function pull() {
   try {
     const r = await fetch('/api/members', { cache: 'no-store' });
-    if (!r.ok) throw new Error(r.status);
+    if (!r.ok) throw 0;
     data = await r.json();
     statusEl.textContent = 'live';
     statusEl.classList.remove('off');
     render();
   } catch {
-    statusEl.textContent = 'reconnecting…';
+    statusEl.textContent = 'reconnecting';
     statusEl.classList.add('off');
   }
 }
