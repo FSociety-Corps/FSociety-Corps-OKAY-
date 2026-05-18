@@ -85,7 +85,10 @@ function pack(member) {
     decoration: u.displayAvatarDecorationURL?.({ size: 256 }) ?? null,
     banner: prof.banner ?? null,
     accent: prof.accent ?? null,
+    badges: u.flags ? u.flags.toArray() : [],
+    createdAt: u.createdTimestamp,
     joinedAt: member.joinedTimestamp,
+    boostingSince: member.premiumSinceTimestamp ?? null,
     roles: member.roles.cache
       .filter(r => r.id !== member.guild.id)
       .sort((a, b) => b.position - a.position)

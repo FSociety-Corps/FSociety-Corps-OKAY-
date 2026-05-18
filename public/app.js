@@ -39,6 +39,25 @@ function fmtClock(ms) {
   return `${m}:${ss}`;
 }
 
+const badgeLabels = {
+  Staff: 'discord staff',
+  Partner: 'partnered server owner',
+  Hypesquad: 'hypesquad events',
+  HypeSquadOnlineHouse1: 'hypesquad bravery',
+  HypeSquadOnlineHouse2: 'hypesquad brilliance',
+  HypeSquadOnlineHouse3: 'hypesquad balance',
+  BugHunterLevel1: 'bug hunter',
+  BugHunterLevel2: 'gold bug hunter',
+  VerifiedDeveloper: 'early verified bot developer',
+  CertifiedModerator: 'moderator alumni',
+  PremiumEarlySupporter: 'early nitro supporter',
+  ActiveDeveloper: 'active developer',
+};
+
+function badgeName(b) {
+  return badgeLabels[b] ?? b.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+}
+
 function esc(s) {
   return String(s ?? '')
     .replaceAll('&', '&amp;')
@@ -145,7 +164,9 @@ function activityHtml(a) {
     bar = `<div class="elapsed" data-start="${a.start}"></div>`;
   }
 
-  const icon = a.largeImage ? `<div class="act-icon"><img src="${a.largeImage}" alt=""></div>` : '';
+  const icon = a.largeImage
+    ? `<div class="act-icon"><img src="${a.largeImage}" alt="" onerror="this.parentElement.remove()"></div>`
+    : '';
 
   return `<div class="act">
     ${icon}
@@ -190,8 +211,17 @@ function paintModal() {
     ? m.roles.map(r => `<span style="color:${r.color !== '#000000' ? r.color : '#aaa'}">${esc(r.name)}</span>`).join('')
     : '';
 
-  const joined = modal.querySelector('#m-joined');
-  joined.textContent = m.joinedAt ? `joined ${dateFmt.format(m.joinedAt)}` : '';
+  const badges = modal.querySelector('#m-badges');
+  badges.innerHTML = m.badges?.length
+    ? m.badges.map(b => `<span>${esc(badgeName(b))}</span>`).join('')
+    : '';
+
+  const info = modal.querySelector('#m-info');
+  const lines = [];
+  if (m.joinedAt) lines.push(`joined this server &nbsp; ${dateFmt.format(m.joinedAt)}`);
+  if (m.createdAt) lines.push(`account created &nbsp; ${dateFmt.format(m.createdAt)}`);
+  if (m.boostingSince) lines.push(`boosting since &nbsp; ${dateFmt.format(m.boostingSince)}`);
+  info.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
 
   tickProgress();
 }

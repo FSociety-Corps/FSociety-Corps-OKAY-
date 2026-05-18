@@ -220,10 +220,14 @@ main.board { display: flex; flex-direction: column; }
   font-variant-numeric: tabular-nums;
 }
 
-.m-roles { color: #888; font-size: 12px; margin-top: 14px; }
+.m-badges { color: #888; font-size: 12px; margin-top: 14px; }
+.m-badges span:not(:last-child)::after { content: ' · '; color: #444; }
+.m-badges span { color: #c8a449; }
+
+.m-roles { color: #888; font-size: 12px; margin-top: 8px; }
 .m-roles span:not(:last-child)::after { content: ', '; color: #444; }
 
-.m-joined { color: #666; font-size: 11px; margin-top: 8px; }
+.m-info { color: #666; font-size: 11px; margin-top: 14px; line-height: 1.7; }
 
 .card {
   position: relative;
